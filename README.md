@@ -27,9 +27,3 @@ Then apply migration:
 php yii migrate --migrationPath="@vendor/qvalent/yii2-models-history/migrations"
 ```
 
-Usage
------
-
-No other steps required. Extension is working now, you can test it by update some project ActiveRecord and see updates in `{{%models_history}}`.
-
-Feel free to create issues if something is wrong.
