@@ -1,6 +1,6 @@
-Model updates history stored in DB
+Model updates history stored in Mongo
 ==================================
-Extension is automatically saves all ActiveRecords inserts, updates and deletes at table `{{%models_history}}`
+Extension is automatically saves all ActiveRecords inserts, updates and deletes at collection `cms_log`
 
 Installation
 ------------
