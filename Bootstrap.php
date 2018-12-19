@@ -10,10 +10,9 @@ use yii\helpers\ArrayHelper;
 
 class Bootstrap implements BootstrapInterface
 {
-    const INSERT = 1;
-    const UPDATE = 2;
-    const DELETE = 3;
-
+    const INSERT = 'INSERT';
+    const UPDATE = 'UPDATE';
+    const DELETE = 'DELETE';
     /**
      * @param \yii\base\Application $app
      */
@@ -29,7 +28,6 @@ class Bootstrap implements BootstrapInterface
             $this->insertHistory($event->sender, self::DELETE);
         });
     }
-
     /**
      * @param $model ActiveRecord
      * @param $type
@@ -37,16 +35,22 @@ class Bootstrap implements BootstrapInterface
      */
     private function insertHistory($model, $type)
     {
-        Yii::$app->db->createCommand()
-            ->insert('{{%models_history}}', [
-                'model_class' => $model::className(),
-                'pk' => is_array($model->getPrimaryKey())
-                    ? json_encode($model->getPrimaryKey()) // if pk is composite
-                    : $model->getPrimaryKey(),
-                'operation_type' => $type,
-                'attributes_json' => json_encode(ArrayHelper::toArray($model)),
-                'created_at' => time()
-            ])
-            ->execute();
+        try {
+            $collection = Yii::$app->mongodb->getCollection('cms_log');
+            $collection->insert([
+                    'changed_by' => Yii::$app->has('user') && Yii::$app->user->isGuest ? null : Yii::$app->user->id,
+                    'userIP' => Yii::$app->has('request') ? Yii::$app->request->userIP : null,
+                    'userAgent' => Yii::$app->has('request') ? Yii::$app->request->userAgent : null,
+                    'date' => date('c'),
+                    'model_class' => $model::className(),
+                    'pk' => $model->getPrimaryKey(),
+                    'operation_type' => $type,
+                    'data' => ArrayHelper::toArray($model),
+                ]);
+        }catch (\Exception $e){
+
+        }
+
+
     }
 }
